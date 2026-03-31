@@ -2,12 +2,25 @@
   "name": "product-comparator",
   "version": "1.0.0",
   "private": true,
-  "description": "Local SQLite persistence API for the Product comparator app",
+  "description": "Product comparator with local SQLite API and Vite frontend",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
-    "start:api": "node server/index.js"
+    "start": "node server/index.js",
+    "start:api": "node server/index.js",
+    "dev": "concurrently -k -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:frontend\"",
+    "dev:api": "node --watch server/index.js",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "npm run build -w frontend",
+    "build:frontend": "npm run build -w frontend",
+    "typecheck": "npm run typecheck -w frontend"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",
     "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

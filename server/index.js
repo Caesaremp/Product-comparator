@@ -8,6 +8,7 @@ const PORT = Number(process.env.PORT || 3187);
 const APP_DATA_ROOT = process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming");
 const APP_DIRECTORY = path.join(APP_DATA_ROOT, "ProductComparator");
 const DATABASE_PATH = path.join(APP_DIRECTORY, "product-comparator.db");
+const FRONTEND_DIST_DIRECTORY = path.join(__dirname, "..", "frontend", "dist");
 
 const SPEC_COLUMN_DEFINITIONS = {
   Monitor: [
@@ -410,7 +411,19 @@ app.delete("/api/products/:id", (req, res) => {
   }
 });
 
+if (fs.existsSync(FRONTEND_DIST_DIRECTORY)) {
+  app.use(express.static(FRONTEND_DIST_DIRECTORY));
+  app.get(/^\/(?!api(?:\/|$)).*/, (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIST_DIRECTORY, "index.html"));
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`Product Comparator API listening on http://localhost:${PORT}`);
   console.log(`SQLite database: ${DATABASE_PATH}`);
+  if (fs.existsSync(FRONTEND_DIST_DIRECTORY)) {
+    console.log(`Frontend bundle: ${FRONTEND_DIST_DIRECTORY}`);
+  } else {
+    console.log("Frontend bundle not found. Build the frontend or run the Vite dev server.");
+  }
 });
