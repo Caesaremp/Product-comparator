@@ -6,7 +6,7 @@ export const CATEGORY_FIELDS: Record<ProductCategory, CategoryFieldDefinition[]>
     { key: "model", label: "Modello", type: "text" },
     { key: "size", label: 'Pollici (")', type: "number", unit: '"' },
     { key: "resolution", label: "Risoluzione", type: "text", placeholder: "es. 3840x2160" },
-    { key: "panelType", label: "Pannello", type: "select", options: ["IPS", "VA", "TN", "OLED", "Mini-LED", "QD-OLED"] },
+    { key: "panelType", label: "Pannello", type: "select", options: ["IPS", "VA", "TN","LED", "OLED", "Mini-LED", "QD-OLED"] },
     { key: "refreshRate", label: "Refresh Rate", type: "number", unit: "Hz" },
     { key: "responseTime", label: "Tempo Risposta", type: "number", unit: "ms" },
     { key: "hdr", label: "HDR", type: "select", options: ["No", "HDR10", "HDR400", "HDR600", "HDR1000", "HDR1400", "Dolby Vision"] },
