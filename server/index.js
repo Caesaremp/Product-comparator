@@ -26,6 +26,14 @@ const SPEC_COLUMN_DEFINITIONS = {
     { key: "vesa", column: "monitor_vesa", kind: "text" },
     { key: "colorGamut", column: "monitor_color_gamut", kind: "text" },
     { key: "energyClass", column: "monitor_energy_class", kind: "text" },
+    { key: "hdmiPorts", column: "monitor_hdmi_ports", kind: "number" },
+    { key: "dpPorts", column: "monitor_dp_ports", kind: "number" },
+    { key: "usbCPorts", column: "monitor_usb_c_ports", kind: "number" },
+    { key: "usbAPorts", column: "monitor_usb_a_ports", kind: "number" },
+    { key: "thunderboltPorts", column: "monitor_thunderbolt_ports", kind: "number" },
+    { key: "contrast", column: "monitor_contrast", kind: "text" },
+    { key: "weight", column: "monitor_weight_kg", kind: "number" },
+    { key: "curved", column: "monitor_curved", kind: "text" },
   ],
   Laptop: [
     { key: "brand", column: "laptop_brand", kind: "text" },
@@ -39,6 +47,14 @@ const SPEC_COLUMN_DEFINITIONS = {
     { key: "battery", column: "laptop_battery", kind: "text" },
     { key: "weight", column: "laptop_weight_kg", kind: "number" },
     { key: "os", column: "laptop_os", kind: "text" },
+    { key: "panelType", column: "laptop_panel_type", kind: "text" },
+    { key: "refreshRate", column: "laptop_refresh_rate_hz", kind: "number" },
+    { key: "webcam", column: "laptop_webcam", kind: "text" },
+    { key: "microphone", column: "laptop_microphone", kind: "text" },
+    { key: "hdmiPorts", column: "laptop_hdmi_ports", kind: "number" },
+    { key: "usbAPorts", column: "laptop_usb_a_ports", kind: "number" },
+    { key: "usbCPorts", column: "laptop_usb_c_ports", kind: "number" },
+    { key: "thunderboltPorts", column: "laptop_thunderbolt_ports", kind: "number" },
   ],
   Tastiera: [
     { key: "brand", column: "keyboard_brand", kind: "text" },
@@ -104,6 +120,14 @@ db.exec(`
     monitor_vesa TEXT,
     monitor_color_gamut TEXT,
     monitor_energy_class TEXT,
+    monitor_hdmi_ports REAL,
+    monitor_dp_ports REAL,
+    monitor_usb_c_ports REAL,
+    monitor_usb_a_ports REAL,
+    monitor_thunderbolt_ports REAL,
+    monitor_contrast TEXT,
+    monitor_weight_kg REAL,
+    monitor_curved TEXT,
     laptop_brand TEXT,
     laptop_model TEXT,
     laptop_cpu TEXT,
@@ -115,6 +139,14 @@ db.exec(`
     laptop_battery TEXT,
     laptop_weight_kg REAL,
     laptop_os TEXT,
+    laptop_panel_type TEXT,
+    laptop_refresh_rate_hz REAL,
+    laptop_webcam TEXT,
+    laptop_microphone TEXT,
+    laptop_hdmi_ports REAL,
+    laptop_usb_a_ports REAL,
+    laptop_usb_c_ports REAL,
+    laptop_thunderbolt_ports REAL,
     keyboard_brand TEXT,
     keyboard_model TEXT,
     keyboard_layout TEXT,
@@ -146,6 +178,32 @@ db.exec(`
     FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
   );
 `);
+
+// Migrate existing databases by adding any missing columns
+const existingColumns = new Set(db.prepare("PRAGMA table_info(products)").all().map((col) => col.name));
+const migrateColumns = [
+  { name: "monitor_hdmi_ports", type: "REAL" },
+  { name: "monitor_dp_ports", type: "REAL" },
+  { name: "monitor_usb_c_ports", type: "REAL" },
+  { name: "monitor_usb_a_ports", type: "REAL" },
+  { name: "monitor_thunderbolt_ports", type: "REAL" },
+  { name: "monitor_contrast", type: "TEXT" },
+  { name: "monitor_weight_kg", type: "REAL" },
+  { name: "monitor_curved", type: "TEXT" },
+  { name: "laptop_panel_type", type: "TEXT" },
+  { name: "laptop_refresh_rate_hz", type: "REAL" },
+  { name: "laptop_webcam", type: "TEXT" },
+  { name: "laptop_microphone", type: "TEXT" },
+  { name: "laptop_hdmi_ports", type: "REAL" },
+  { name: "laptop_usb_a_ports", type: "REAL" },
+  { name: "laptop_usb_c_ports", type: "REAL" },
+  { name: "laptop_thunderbolt_ports", type: "REAL" },
+];
+for (const col of migrateColumns) {
+  if (!existingColumns.has(col.name)) {
+    db.exec(`ALTER TABLE products ADD COLUMN ${col.name} ${col.type}`);
+  }
+}
 
 const upsertProductStatement = db.prepare(`
   INSERT INTO products (${PRODUCT_COLUMNS.join(", ")})

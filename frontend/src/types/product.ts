@@ -31,7 +31,16 @@ export type SpecKey =
   | "connection"
   | "backlight"
   | "hotswap"
-  | "description";
+  | "description"
+  | "hdmiPorts"
+  | "dpPorts"
+  | "usbAPorts"
+  | "usbCPorts"
+  | "thunderboltPorts"
+  | "contrast"
+  | "microphone"
+  | "webcam"
+  | "curved";
 
 export type ProductSpecValue = string | number;
 export type ProductSpecs = Partial<Record<SpecKey, ProductSpecValue>>;
