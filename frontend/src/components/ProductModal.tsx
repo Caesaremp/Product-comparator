@@ -230,14 +230,24 @@ export function ProductModal({ product, categories, onSave, onClose }: ProductMo
               />
             </div>
             <div className="field">
-              <label className="label">Rating fonte</label>
-              <StarRating
-                value={newReview.rating}
-                size={16}
-                onChange={(rating) => {
-                  setNewReview((current) => ({ ...current, rating }));
-                }}
-              />
+              <label className="label">Rating (0–5)</label>
+              <div className="rating-input-row">
+                <input
+                  className="input"
+                  type="number"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  placeholder="es. 4.5"
+                  value={newReview.rating === 0 ? "" : newReview.rating}
+                  onChange={(event) => {
+                    const raw = parseFloat(event.target.value);
+                    const rating = Number.isFinite(raw) ? Math.min(5, Math.max(0, raw)) : 0;
+                    setNewReview((current) => ({ ...current, rating }));
+                  }}
+                />
+                <StarRating value={newReview.rating} size={16} />
+              </div>
             </div>
           </div>
           <div className="field">

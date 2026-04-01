@@ -253,7 +253,7 @@ function normalizeRating(value) {
   if (!Number.isFinite(numberValue)) {
     return 0;
   }
-  return Math.max(0, Math.min(5, Math.round(numberValue)));
+  return Math.max(0, Math.min(5, Math.round(numberValue * 10) / 10));
 }
 
 function emptySpecColumns() {

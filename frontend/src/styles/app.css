@@ -629,18 +629,42 @@ a {
   gap: 2px;
 }
 
-.star {
-  border: none;
-  padding: 0;
-  color: var(--c-muted);
-  background: none;
-  cursor: pointer;
-  transition: color 0.1s;
+.star-container {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
 }
 
-.star.filled,
-.star:hover {
+.star {
+  display: block;
+  border: none;
+  padding: 0;
+  background: none;
+  line-height: 1;
+}
+
+.star-bg {
+  color: var(--c-muted);
+}
+
+.star-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  white-space: nowrap;
   color: var(--c-warning);
+}
+
+.rating-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-input-row .input {
+  width: 80px;
+  flex-shrink: 0;
 }
 
 .review-item {
