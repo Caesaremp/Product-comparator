@@ -788,3 +788,65 @@ a {
     align-items: flex-start;
   }
 }
+
+/* ── Monitor score bars ─────────────────────────────────────────────────────── */
+
+.monitor-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 160px;
+}
+
+.ms-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 22px 8px 22px;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+.ms-label {
+  color: var(--c-text-secondary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ms-bar-wrap {
+  height: 5px;
+  background: var(--c-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ms-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.ms-val {
+  text-align: right;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.ms-sep {
+  color: var(--c-muted);
+  text-align: center;
+}
+
+.ms-qp-val {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ms-legend {
+  font-size: 9px;
+  color: var(--c-muted);
+  text-align: right;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}

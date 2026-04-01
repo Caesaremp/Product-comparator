@@ -4,11 +4,23 @@ import { ProductCard } from "./components/ProductCard";
 import { ProductModal } from "./components/ProductModal";
 import { CATEGORIES } from "./data/catalog";
 import { createProduct, deleteProductById, getErrorMessage, loadProducts, updateProduct } from "./lib/api";
-import { calcQualityPriceIndex } from "./lib/scoring";
+import { calcMonitorScores, calcQualityPriceIndex } from "./lib/scoring";
 import type { Product, ProductCategory } from "./types/product";
 
 type ViewMode = "products" | "compare";
-type SortMode = "date" | "price" | "qp" | "rating";
+type SortMode =
+  | "date"
+  | "price"
+  | "qp"
+  | "rating"
+  | "perf_coding"
+  | "perf_gaming"
+  | "perf_grafica"
+  | "perf_overall"
+  | "qp_coding"
+  | "qp_gaming"
+  | "qp_grafica"
+  | "qp_overall";
 type FilterCategory = "Tutti" | ProductCategory;
 
 export default function App() {
@@ -92,6 +104,22 @@ export default function App() {
         return list.sort((left, right) => (calcQualityPriceIndex(right) ?? -1) - (calcQualityPriceIndex(left) ?? -1));
       case "rating":
         return list.sort((left, right) => right.rating - left.rating);
+      case "perf_coding":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.coding ?? -1) - (calcMonitorScores(a, products)?.coding ?? -1));
+      case "perf_gaming":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.gaming ?? -1) - (calcMonitorScores(a, products)?.gaming ?? -1));
+      case "perf_grafica":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.grafica ?? -1) - (calcMonitorScores(a, products)?.grafica ?? -1));
+      case "perf_overall":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.overall ?? -1) - (calcMonitorScores(a, products)?.overall ?? -1));
+      case "qp_coding":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.codingQP ?? -1) - (calcMonitorScores(a, products)?.codingQP ?? -1));
+      case "qp_gaming":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.gamingQP ?? -1) - (calcMonitorScores(a, products)?.gamingQP ?? -1));
+      case "qp_grafica":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.graficaQP ?? -1) - (calcMonitorScores(a, products)?.graficaQP ?? -1));
+      case "qp_overall":
+        return list.sort((a, b) => (calcMonitorScores(b, products)?.overallQP ?? -1) - (calcMonitorScores(a, products)?.overallQP ?? -1));
       default:
         return list.sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime());
     }
@@ -159,6 +187,18 @@ export default function App() {
                   <option value="price">Prezzo ↑</option>
                   <option value="qp">Qualità/Prezzo ↓</option>
                   <option value="rating">Rating ↓</option>
+                  <optgroup label="Monitor — Performance">
+                    <option value="perf_overall">Perf. Overall ↓</option>
+                    <option value="perf_coding">Perf. Coding ↓</option>
+                    <option value="perf_gaming">Perf. Gaming ↓</option>
+                    <option value="perf_grafica">Perf. Grafica ↓</option>
+                  </optgroup>
+                  <optgroup label="Monitor — Q/P">
+                    <option value="qp_overall">Q/P Overall ↓</option>
+                    <option value="qp_coding">Q/P Coding ↓</option>
+                    <option value="qp_gaming">Q/P Gaming ↓</option>
+                    <option value="qp_grafica">Q/P Grafica ↓</option>
+                  </optgroup>
                 </select>
               </div>
               <button
@@ -201,6 +241,7 @@ export default function App() {
                     <ProductCard
                       key={product.id}
                       product={product}
+                      allProducts={products}
                       compareSelected={compareIds.has(product.id)}
                       onEdit={(nextProduct) => {
                         setEditProduct(nextProduct);
@@ -215,7 +256,7 @@ export default function App() {
             )}
           </>
         ) : (
-          <CompareView products={compareProducts} />
+          <CompareView products={compareProducts} allProducts={products} />
         )}
 
         {showModal ? (

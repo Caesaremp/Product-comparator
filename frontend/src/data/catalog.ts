@@ -23,6 +23,7 @@ export const CATEGORY_FIELDS: Record<ProductCategory, CategoryFieldDefinition[]>
     { key: "vesa", label: "VESA", type: "select", options: ["Sì", "No"] },
     { key: "colorGamut", label: "Gamut colore", type: "text", placeholder: "es. 100% sRGB, 95% DCI-P3" },
     { key: "energyClass", label: "Classe energetica", type: "text" },
+    { key: "ports", label: "Note porte", type: "text", placeholder: "es. USB-C PD 96W, KVM, Ethernet, Audio" },
   ],
   Laptop: [
     { key: "brand", label: "Brand", type: "text" },

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find /c/Users/Cesare/Prog/Product comparator/server -type f \\\\\\(-name *.ts -o -name *.js -o -name *.json -o -name *.sql \\\\\\))"
+      "Bash(find /c/Users/Cesare/Prog/Product comparator/server -type f \\\\\\(-name *.ts -o -name *.js -o -name *.json -o -name *.sql \\\\\\))",
+      "Bash(find /c/Users/Cesare/Prog/Product comparator/server -type f -name *.ts -o -name *.js)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

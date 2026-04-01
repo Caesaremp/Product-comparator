@@ -1,19 +1,38 @@
 import { CATEGORY_FIELDS } from "../data/catalog";
-import { calcQualityPriceIndex, getQualityPriceColor, getQualityPriceLabel } from "../lib/scoring";
+import { calcMonitorScores, calcQualityPriceIndex, getMonitorScoreColor, getMonitorScoreLabel, getQualityPriceColor, getQualityPriceLabel } from "../lib/scoring";
 import { StarRating } from "./StarRating";
 import type { Product } from "../types/product";
 
 interface ProductCardProps {
   product: Product;
+  allProducts: Product[];
   compareSelected: boolean;
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
   onToggleCompare: (id: string) => void;
 }
 
-export function ProductCard({ product, compareSelected, onEdit, onDelete, onToggleCompare }: ProductCardProps) {
+function ScoreBar({ label, score, qp }: { label: string; score: number; qp: number }) {
+  const color = getMonitorScoreColor(score);
+  const qpColor = getMonitorScoreColor(qp);
+  return (
+    <div className="ms-row">
+      <span className="ms-label">{label}</span>
+      <div className="ms-bar-wrap">
+        <div className="ms-bar" style={{ width: `${score}%`, background: color }} />
+      </div>
+      <span className="ms-val" style={{ color }}>{score}</span>
+      <span className="ms-sep">|</span>
+      <span className="ms-qp-val" style={{ color: qpColor }}>{qp}</span>
+    </div>
+  );
+}
+
+export function ProductCard({ product, allProducts, compareSelected, onEdit, onDelete, onToggleCompare }: ProductCardProps) {
   const fields = CATEGORY_FIELDS[product.category] ?? CATEGORY_FIELDS.Generico;
-  const qpIndex = calcQualityPriceIndex(product);
+  const monitorScores = product.category === "Monitor" ? calcMonitorScores(product, allProducts) : null;
+  const qpIndex = monitorScores === null ? calcQualityPriceIndex(product) : null;
+
   const topSpecs = fields
     .filter((field) => product.specs[field.key])
     .slice(0, 5)
@@ -50,11 +69,21 @@ export function ProductCard({ product, compareSelected, onEdit, onDelete, onTogg
         </div>
       </td>
       <td className="pc-td-qp">
-        <div className="qp-badge">
-          <span className="qp-dot" style={{ background: getQualityPriceColor(qpIndex) }} />
-          <span style={{ color: getQualityPriceColor(qpIndex) }}>{qpIndex ?? "—"}</span>
-          <span className="qp-label">{getQualityPriceLabel(qpIndex)}</span>
-        </div>
+        {monitorScores ? (
+          <div className="monitor-scores">
+            <ScoreBar label="Coding"  score={monitorScores.coding}  qp={monitorScores.codingQP} />
+            <ScoreBar label="Gaming"  score={monitorScores.gaming}  qp={monitorScores.gamingQP} />
+            <ScoreBar label="Grafica" score={monitorScores.grafica} qp={monitorScores.graficaQP} />
+            <ScoreBar label="Overall" score={monitorScores.overall} qp={monitorScores.overallQP} />
+            <div className="ms-legend">Perf &nbsp;|&nbsp; Q/P</div>
+          </div>
+        ) : (
+          <div className="qp-badge">
+            <span className="qp-dot" style={{ background: getQualityPriceColor(qpIndex) }} />
+            <span style={{ color: getQualityPriceColor(qpIndex) }}>{qpIndex ?? "—"}</span>
+            <span className="qp-label">{getQualityPriceLabel(qpIndex)}</span>
+          </div>
+        )}
       </td>
       <td className="pc-td-rating">
         {(() => {
