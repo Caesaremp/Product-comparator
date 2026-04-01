@@ -12,8 +12,6 @@ const FRONTEND_DIST_DIRECTORY = path.join(__dirname, "..", "frontend", "dist");
 
 const SPEC_COLUMN_DEFINITIONS = {
   Monitor: [
-    { key: "brand", column: "monitor_brand", kind: "text" },
-    { key: "model", column: "monitor_model", kind: "text" },
     { key: "size", column: "monitor_size_inches", kind: "number" },
     { key: "resolution", column: "monitor_resolution", kind: "text" },
     { key: "panelType", column: "monitor_panel_type", kind: "text" },
