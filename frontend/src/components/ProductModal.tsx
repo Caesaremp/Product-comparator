@@ -146,15 +146,6 @@ export function ProductModal({ product, categories, onSave, onClose }: ProductMo
           />
         </div>
 
-        <div className="field">
-          <label className="label">Valutazione personale</label>
-          <StarRating
-            value={data.rating}
-            onChange={(rating) => {
-              setData((current) => ({ ...current, rating }));
-            }}
-          />
-        </div>
 
         <div className="section-title">Caratteristiche</div>
         <div className="field-row">

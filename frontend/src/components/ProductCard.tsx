@@ -23,16 +23,15 @@ export function ProductCard({ product, compareSelected, onEdit, onDelete, onTogg
     });
 
   return (
-    <div className="card product-card" onClick={() => onEdit(product)}>
-      <div className="pc-header">
-        <div>
-          <div className="pc-category">{product.category}</div>
-          <div className="pc-name">{product.name || "—"}</div>
-        </div>
-        <div className="pc-price">{product.price ? `€${Number.parseFloat(String(product.price)).toFixed(2)}` : "—"}</div>
-      </div>
-
-      {topSpecs.length > 0 ? (
+    <tr className="product-row" onClick={() => onEdit(product)}>
+      <td className="pc-td-name">
+        <div className="pc-category">{product.category}</div>
+        <div className="pc-name">{product.name || "—"}</div>
+      </td>
+      <td className="pc-td-price">
+        <span className="pc-price">{product.price ? `€${Number.parseFloat(String(product.price)).toFixed(2)}` : "—"}</span>
+      </td>
+      <td className="pc-td-specs">
         <div className="pc-specs">
           {topSpecs.map((spec, index) => (
             <span className="spec-chip" key={`${product.id}-spec-${index}`}>
@@ -40,51 +39,49 @@ export function ProductCard({ product, compareSelected, onEdit, onDelete, onTogg
             </span>
           ))}
         </div>
-      ) : null}
-
-      {product.useCases.length > 0 ? (
-        <div className="pc-specs pc-specs-secondary">
+      </td>
+      <td className="pc-td-uses">
+        <div className="pc-specs">
           {product.useCases.map((useCase) => (
             <span className="spec-chip spec-chip-use-case" key={useCase}>
               {useCase}
             </span>
           ))}
         </div>
-      ) : null}
-
-      <div className="pc-footer">
-        <div className="pc-meta">
-          <div className="qp-badge">
-            <span className="qp-dot" style={{ background: getQualityPriceColor(qpIndex) }} />
-            <span style={{ color: getQualityPriceColor(qpIndex) }}>{qpIndex ?? "—"}</span>
-            <span className="qp-label">{getQualityPriceLabel(qpIndex)}</span>
-          </div>
-          {product.rating > 0 ? <StarRating value={product.rating} size={13} /> : null}
+      </td>
+      <td className="pc-td-qp">
+        <div className="qp-badge">
+          <span className="qp-dot" style={{ background: getQualityPriceColor(qpIndex) }} />
+          <span style={{ color: getQualityPriceColor(qpIndex) }}>{qpIndex ?? "—"}</span>
+          <span className="qp-label">{getQualityPriceLabel(qpIndex)}</span>
         </div>
-        <div
-          className="pc-actions"
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-        >
-          {product.url ? (
-            <a href={product.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm" title="Apri link">
-              ↗
-            </a>
-          ) : null}
-          <label className="compare-toggle" title="Confronta">
-            <input
-              type="checkbox"
-              className="compare-check"
-              checked={compareSelected}
-              onChange={() => onToggleCompare(product.id)}
-            />
-          </label>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => onDelete(product.id)} title="Elimina">
-            🗑
-          </button>
-        </div>
-      </div>
-    </div>
+      </td>
+      <td className="pc-td-rating">
+        {product.rating > 0 ? <StarRating value={product.rating} size={13} /> : <span className="pc-no-rating">—</span>}
+      </td>
+      <td
+        className="pc-td-actions"
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        {product.url ? (
+          <a href={product.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm" title="Apri link">
+            ↗
+          </a>
+        ) : null}
+        <label className="compare-toggle" title="Confronta">
+          <input
+            type="checkbox"
+            className="compare-check"
+            checked={compareSelected}
+            onChange={() => onToggleCompare(product.id)}
+          />
+        </label>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => onDelete(product.id)} title="Elimina">
+          🗑
+        </button>
+      </td>
+    </tr>
   );
 }

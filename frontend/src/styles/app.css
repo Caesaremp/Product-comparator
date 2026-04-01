@@ -328,37 +328,56 @@ a {
   line-height: 1.5;
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
+/* ── Products table ─────────────────────────────────────────────── */
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
   margin-top: 20px;
+  font-size: 13px;
 }
 
-.product-card {
-  position: relative;
+.products-table thead tr {
+  border-bottom: 1px solid var(--c-border);
+}
+
+.products-table th {
+  padding: 6px 12px;
+  text-align: left;
+  color: var(--c-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.product-row {
+  border-bottom: 1px solid var(--c-border);
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-.pc-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+.product-row:hover {
+  background: var(--c-surface2);
+}
+
+.product-row td {
+  padding: 8px 12px;
+  vertical-align: middle;
 }
 
 .pc-category {
-  margin-bottom: 4px;
   color: var(--c-accent);
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .pc-name {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -367,48 +386,32 @@ a {
   white-space: nowrap;
   color: var(--c-accent);
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
+}
+
+.pc-no-rating {
+  color: var(--c-muted);
 }
 
 .pc-specs {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 12px;
-}
-
-.pc-specs-secondary {
-  margin-top: 6px;
+  gap: 4px;
 }
 
 .spec-chip {
   border-radius: 4px;
-  padding: 3px 8px;
+  padding: 2px 7px;
   background: var(--c-surface2);
   color: var(--c-text-secondary);
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .spec-chip-use-case {
   border-left: 2px solid var(--c-accent);
-  padding-left: 8px;
-}
-
-.pc-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--c-border);
-}
-
-.pc-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  padding-left: 7px;
 }
 
 .qp-badge {
@@ -718,12 +721,17 @@ a {
 }
 
 @media (max-width: 640px) {
+  .products-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
   .header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .products-grid,
   .field-row {
     grid-template-columns: 1fr;
   }
@@ -748,17 +756,11 @@ a {
     width: 100%;
   }
 
-  .pc-footer,
   .toolbar,
   .status-banner,
   .modal-actions,
   .review-header {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .pc-actions {
-    align-self: stretch;
-    justify-content: flex-end;
   }
 }

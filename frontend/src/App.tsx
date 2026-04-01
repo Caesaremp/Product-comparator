@@ -184,21 +184,34 @@ export default function App() {
                 <p>Aggiungi il tuo primo prodotto per iniziare a confrontare e trovare il miglior rapporto qualità/prezzo.</p>
               </div>
             ) : (
-              <div className="products-grid">
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    compareSelected={compareIds.has(product.id)}
-                    onEdit={(nextProduct) => {
-                      setEditProduct(nextProduct);
-                      setShowModal(true);
-                    }}
-                    onDelete={(id) => void handleDelete(id)}
-                    onToggleCompare={toggleCompare}
-                  />
-                ))}
-              </div>
+              <table className="products-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Prezzo</th>
+                    <th>Specifiche</th>
+                    <th>Usi</th>
+                    <th>Q/P</th>
+                    <th>Rating</th>
+                    <th>Azioni</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      compareSelected={compareIds.has(product.id)}
+                      onEdit={(nextProduct) => {
+                        setEditProduct(nextProduct);
+                        setShowModal(true);
+                      }}
+                      onDelete={(id) => void handleDelete(id)}
+                      onToggleCompare={toggleCompare}
+                    />
+                  ))}
+                </tbody>
+              </table>
             )}
           </>
         ) : (
