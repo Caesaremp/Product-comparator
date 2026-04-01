@@ -173,7 +173,8 @@ db.exec(`
     product_id TEXT NOT NULL,
     source TEXT NOT NULL,
     text TEXT NOT NULL,
-    rating INTEGER NOT NULL DEFAULT 0,
+    rating REAL NOT NULL DEFAULT 0,
+    count INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
     FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
   );
@@ -205,6 +206,11 @@ for (const col of migrateColumns) {
   }
 }
 
+const existingReviewColumns = new Set(db.prepare("PRAGMA table_info(product_reviews)").all().map((col) => col.name));
+if (!existingReviewColumns.has("count")) {
+  db.exec("ALTER TABLE product_reviews ADD COLUMN count INTEGER NOT NULL DEFAULT 0");
+}
+
 const upsertProductStatement = db.prepare(`
   INSERT INTO products (${PRODUCT_COLUMNS.join(", ")})
   VALUES (${PRODUCT_COLUMNS.map((column) => `@${column}`).join(", ")})
@@ -218,14 +224,14 @@ const deleteProductStatement = db.prepare("DELETE FROM products WHERE id = ?");
 const selectAllProductsStatement = db.prepare("SELECT * FROM products ORDER BY datetime(created_at) DESC, id DESC");
 const selectProductStatement = db.prepare("SELECT * FROM products WHERE id = ?");
 const selectAllUseCasesStatement = db.prepare("SELECT product_id, use_case FROM product_use_cases ORDER BY id ASC");
-const selectAllReviewsStatement = db.prepare("SELECT id, product_id, source, text, rating, created_at FROM product_reviews ORDER BY id ASC");
+const selectAllReviewsStatement = db.prepare("SELECT id, product_id, source, text, rating, count, created_at FROM product_reviews ORDER BY id ASC");
 const selectReviewsForProductStatement = db.prepare("SELECT id, created_at FROM product_reviews WHERE product_id = ?");
 const deleteUseCasesForProductStatement = db.prepare("DELETE FROM product_use_cases WHERE product_id = ?");
 const deleteReviewsForProductStatement = db.prepare("DELETE FROM product_reviews WHERE product_id = ?");
 const insertUseCaseStatement = db.prepare("INSERT INTO product_use_cases (product_id, use_case) VALUES (?, ?)");
 const insertReviewStatement = db.prepare(`
-  INSERT INTO product_reviews (id, product_id, source, text, rating, created_at)
-  VALUES (@id, @product_id, @source, @text, @rating, @created_at)
+  INSERT INTO product_reviews (id, product_id, source, text, rating, count, created_at)
+  VALUES (@id, @product_id, @source, @text, @rating, @count, @created_at)
 `);
 
 function normalizeText(value) {
@@ -289,6 +295,7 @@ function normalizeReviews(reviews, existingCreatedAtById) {
         source,
         text,
         rating: normalizeRating(review?.rating),
+        count: Math.max(0, Math.trunc(Number(review?.count) || 0)),
         created_at: existingCreatedAtById.get(id) || new Date().toISOString(),
       };
     })
@@ -352,6 +359,7 @@ function hydrateProducts() {
       source: row.source,
       text: row.text,
       rating: row.rating,
+      count: row.count || 0,
     });
   }
 

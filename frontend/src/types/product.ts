@@ -51,6 +51,7 @@ export interface ProductReview {
   source: string;
   text: string;
   rating: number;
+  count: number;
 }
 
 export interface Product {

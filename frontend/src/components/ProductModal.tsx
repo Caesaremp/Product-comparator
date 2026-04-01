@@ -15,11 +15,12 @@ interface DraftReview {
   source: string;
   text: string;
   rating: number;
+  count: number;
 }
 
 export function ProductModal({ product, categories, onSave, onClose }: ProductModalProps) {
   const [data, setData] = useState<Product>(product ?? createEmptyProduct());
-  const [newReview, setNewReview] = useState<DraftReview>({ source: "", text: "", rating: 0 });
+  const [newReview, setNewReview] = useState<DraftReview>({ source: "", text: "", rating: 0, count: 0 });
 
   const fields = CATEGORY_FIELDS[data.category] ?? CATEGORY_FIELDS.Generico;
   const useCases = USE_CASES[data.category] ?? USE_CASES.Generico;
@@ -62,13 +63,14 @@ export function ProductModal({ product, categories, onSave, onClose }: ProductMo
       source: newReview.source,
       text: newReview.text,
       rating: newReview.rating,
+      count: newReview.count,
     };
 
     setData((current) => ({
       ...current,
       reviews: [...current.reviews, review],
     }));
-    setNewReview({ source: "", text: "", rating: 0 });
+    setNewReview({ source: "", text: "", rating: 0, count: 0 });
   }
 
   function removeReview(id: string) {
@@ -208,6 +210,7 @@ export function ProductModal({ product, categories, onSave, onClose }: ProductMo
               <span className="review-source">{review.source}</span>
               <div className="review-actions">
                 {review.rating > 0 ? <StarRating value={review.rating} size={12} /> : null}
+                {review.count > 0 ? <span className="review-count">{review.count} rec.</span> : null}
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeReview(review.id)}>
                   ×
                 </button>
@@ -226,6 +229,22 @@ export function ProductModal({ product, categories, onSave, onClose }: ProductMo
                 value={newReview.source}
                 onChange={(event) => {
                   setNewReview((current) => ({ ...current, source: event.target.value }));
+                }}
+              />
+            </div>
+            <div className="field">
+              <label className="label">N° recensioni</label>
+              <input
+                className="input"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="es. 1250"
+                value={newReview.count === 0 ? "" : newReview.count}
+                onChange={(event) => {
+                  const raw = parseInt(event.target.value, 10);
+                  const count = Number.isFinite(raw) ? Math.max(0, raw) : 0;
+                  setNewReview((current) => ({ ...current, count }));
                 }}
               />
             </div>
