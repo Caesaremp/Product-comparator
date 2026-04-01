@@ -57,7 +57,12 @@ export function ProductCard({ product, compareSelected, onEdit, onDelete, onTogg
         </div>
       </td>
       <td className="pc-td-rating">
-        {product.rating > 0 ? <StarRating value={product.rating} size={13} /> : <span className="pc-no-rating">—</span>}
+        {(() => {
+          const rated = product.reviews.filter((r) => r.rating > 0);
+          if (rated.length === 0) return <span className="pc-no-rating">—</span>;
+          const avg = rated.reduce((sum, r) => sum + r.rating, 0) / rated.length;
+          return <StarRating value={avg} size={13} />;
+        })()}
       </td>
       <td
         className="pc-td-actions"

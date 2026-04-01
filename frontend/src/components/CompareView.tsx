@@ -32,9 +32,14 @@ export function CompareView({ products }: CompareViewProps) {
       render: (product) => (product.price ? `€${Number.parseFloat(String(product.price)).toFixed(2)}` : "—"),
     },
     {
-      label: "Rating",
+      label: "Rating medio",
       key: "_rating",
-      render: (product) => (product.rating ? "★".repeat(product.rating) + "☆".repeat(5 - product.rating) : "—"),
+      render: (product) => {
+        const rated = product.reviews.filter((r) => r.rating > 0);
+        if (rated.length === 0) return "—";
+        const avg = rated.reduce((sum, r) => sum + r.rating, 0) / rated.length;
+        return `${avg.toFixed(1)} / 5`;
+      },
     },
     {
       label: "Q/P Index",
