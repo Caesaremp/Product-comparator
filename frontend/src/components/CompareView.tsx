@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { CATEGORY_FIELDS } from "../data/catalog";
-import { type MonitorScores, calcMonitorScores, calcQualityPriceIndex, getMonitorScoreColor, getMonitorScoreLabel, getQualityPriceLabel } from "../lib/scoring";
+import { type BlenderScores, type MonitorScores, calcBlenderScores, calcMonitorScores, calcQualityPriceIndex, getMonitorScoreColor, getMonitorScoreLabel, getQualityPriceLabel } from "../lib/scoring";
 import type { Product } from "../types/product";
 
 interface CompareViewProps {
@@ -29,6 +29,7 @@ export function CompareView({ products, allProducts }: CompareViewProps) {
   const category = products[0].category;
   const fields = CATEGORY_FIELDS[category] ?? CATEGORY_FIELDS.Generico;
   const isMonitor = category === "Monitor";
+  const isBlender = category === "Frullatore";
 
   function monitorScoreRow(
     label: string,
@@ -75,6 +76,53 @@ export function CompareView({ products, allProducts }: CompareViewProps) {
       ]
     : [];
 
+  function blenderScoreRow(
+    label: string,
+    key: string,
+    getScore: (s: BlenderScores) => number,
+  ): CompareRow {
+    return {
+      label,
+      key,
+      render: (product) => {
+        const bs = calcBlenderScores(product, allProducts);
+        const val = bs ? getScore(bs) : undefined;
+        if (val === undefined || val === null) return "—";
+        return (
+          <span style={{ color: getMonitorScoreColor(val), fontWeight: 600 }}>
+            {val} <span style={{ fontWeight: 400, color: "var(--c-text-secondary)", fontSize: "0.75rem" }}>— {getMonitorScoreLabel(val)}</span>
+          </span>
+        );
+      },
+      getValue: (product) => {
+        const bs = calcBlenderScores(product, allProducts);
+        return bs ? (getScore(bs) ?? null) : null;
+      },
+      getBestValue: (prods) => {
+        const vals = prods.map((p) => {
+          const bs = calcBlenderScores(p, allProducts);
+          return bs ? (getScore(bs) ?? null) : null;
+        }).filter((v): v is number => v !== null);
+        return vals.length ? Math.max(...vals) : null;
+      },
+    };
+  }
+
+  const blenderScoreRows: CompareRow[] = isBlender
+    ? [
+        blenderScoreRow("Perf. Smoothie",   "_bs_smoothie",    (s) => s.smoothie),
+        blenderScoreRow("Perf. Ghiaccio",   "_bs_ghiaccio",    (s) => s.ghiaccio),
+        blenderScoreRow("Perf. Famiglia",   "_bs_famiglia",    (s) => s.famiglia),
+        blenderScoreRow("Perf. Pulizia",    "_bs_pulizia",     (s) => s.pulizia),
+        blenderScoreRow("Perf. Overall",    "_bs_overall",     (s) => s.overall),
+        blenderScoreRow("Q/P Smoothie",     "_bs_qp_smoothie", (s) => s.smoothieQP),
+        blenderScoreRow("Q/P Ghiaccio",     "_bs_qp_ghiaccio", (s) => s.ghiaccioQP),
+        blenderScoreRow("Q/P Famiglia",     "_bs_qp_famiglia", (s) => s.famigliaQP),
+        blenderScoreRow("Q/P Pulizia",      "_bs_qp_pulizia",  (s) => s.puliziaQP),
+        blenderScoreRow("Q/P Overall",      "_bs_qp_overall",  (s) => s.overallQP),
+      ]
+    : [];
+
   const rows: CompareRow[] = [
     {
       label: "Prezzo",
@@ -96,7 +144,7 @@ export function CompareView({ products, allProducts }: CompareViewProps) {
         return `${avg.toFixed(1)} / 5`;
       },
     },
-    ...(!isMonitor
+    ...(!isMonitor && !isBlender
       ? [
           {
             label: "Q/P Index",
@@ -114,6 +162,7 @@ export function CompareView({ products, allProducts }: CompareViewProps) {
         ]
       : []),
     ...monitorScoreRows,
+    ...blenderScoreRows,
     ...fields.map((field) => ({
       label: field.label,
       key: field.key,

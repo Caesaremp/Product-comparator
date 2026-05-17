@@ -1,5 +1,5 @@
 import { CATEGORY_FIELDS } from "../data/catalog";
-import { calcMonitorScores, calcQualityPriceIndex, getMonitorScoreColor, getMonitorScoreLabel, getQualityPriceColor, getQualityPriceLabel } from "../lib/scoring";
+import { calcBlenderScores, calcMonitorScores, calcQualityPriceIndex, getMonitorScoreColor, getQualityPriceColor, getQualityPriceLabel } from "../lib/scoring";
 import { StarRating } from "./StarRating";
 import type { Product } from "../types/product";
 
@@ -31,7 +31,8 @@ function ScoreBar({ label, score, qp }: { label: string; score: number; qp: numb
 export function ProductCard({ product, allProducts, compareSelected, onEdit, onDelete, onToggleCompare }: ProductCardProps) {
   const fields = CATEGORY_FIELDS[product.category] ?? CATEGORY_FIELDS.Generico;
   const monitorScores = product.category === "Monitor" ? calcMonitorScores(product, allProducts) : null;
-  const qpIndex = monitorScores === null ? calcQualityPriceIndex(product) : null;
+  const blenderScores = product.category === "Frullatore" ? calcBlenderScores(product, allProducts) : null;
+  const qpIndex = monitorScores === null && blenderScores === null ? calcQualityPriceIndex(product) : null;
 
   const topSpecs = fields
     .filter((field) => product.specs[field.key])
@@ -75,6 +76,14 @@ export function ProductCard({ product, allProducts, compareSelected, onEdit, onD
             <ScoreBar label="Gaming"  score={monitorScores.gaming}  qp={monitorScores.gamingQP} />
             <ScoreBar label="Grafica" score={monitorScores.grafica} qp={monitorScores.graficaQP} />
             <ScoreBar label="Overall" score={monitorScores.overall} qp={monitorScores.overallQP} />
+            <div className="ms-legend">Perf &nbsp;|&nbsp; Q/P</div>
+          </div>
+        ) : blenderScores ? (
+          <div className="monitor-scores">
+            <ScoreBar label="Smooth" score={blenderScores.smoothie} qp={blenderScores.smoothieQP} />
+            <ScoreBar label="Ghiacc" score={blenderScores.ghiaccio} qp={blenderScores.ghiaccioQP} />
+            <ScoreBar label="Fam." score={blenderScores.famiglia} qp={blenderScores.famigliaQP} />
+            <ScoreBar label="Overall" score={blenderScores.overall} qp={blenderScores.overallQP} />
             <div className="ms-legend">Perf &nbsp;|&nbsp; Q/P</div>
           </div>
         ) : (

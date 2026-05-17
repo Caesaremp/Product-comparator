@@ -1,4 +1,4 @@
-export type ProductCategory = "Monitor" | "Laptop" | "Tastiera" | "Generico";
+export type ProductCategory = "Monitor" | "Laptop" | "Tastiera" | "Frullatore" | "Generico";
 
 export type CategoryFieldType = "text" | "number" | "select" | "textarea";
 
@@ -40,7 +40,23 @@ export type SpecKey =
   | "contrast"
   | "microphone"
   | "webcam"
-  | "curved";
+  | "curved"
+  | "power"
+  | "rpm"
+  | "capacity"
+  | "usableCapacity"
+  | "travelCupCapacity"
+  | "programs"
+  | "manualSpeeds"
+  | "bladeTechnology"
+  | "bladeMaterial"
+  | "bladeCount"
+  | "jarMaterial"
+  | "dishwasherSafe"
+  | "bpaFree"
+  | "iceCrush"
+  | "dimensions"
+  | "includedAccessories";
 
 export type ProductSpecValue = string | number;
 export type ProductSpecs = Partial<Record<SpecKey, ProductSpecValue>>;
