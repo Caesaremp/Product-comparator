@@ -1,5 +1,5 @@
 import { CATEGORY_FIELDS } from "../data/catalog";
-import { calcBlenderScores, calcMonitorScores, calcQualityPriceIndex, getMonitorScoreColor, getQualityPriceColor, getQualityPriceLabel } from "../lib/scoring";
+import { calcCategoryScores, calcQualityPriceIndex, getCategoryScoring, getMonitorScoreColor, getQualityPriceColor, getQualityPriceLabel } from "../lib/scoring";
 import { StarRating } from "./StarRating";
 import type { Product } from "../types/product";
 
@@ -30,9 +30,9 @@ function ScoreBar({ label, score, qp }: { label: string; score: number; qp: numb
 
 export function ProductCard({ product, allProducts, compareSelected, onEdit, onDelete, onToggleCompare }: ProductCardProps) {
   const fields = CATEGORY_FIELDS[product.category] ?? CATEGORY_FIELDS.Generico;
-  const monitorScores = product.category === "Monitor" ? calcMonitorScores(product, allProducts) : null;
-  const blenderScores = product.category === "Frullatore" ? calcBlenderScores(product, allProducts) : null;
-  const qpIndex = monitorScores === null && blenderScores === null ? calcQualityPriceIndex(product) : null;
+  const scoring = getCategoryScoring(product.category);
+  const scores = calcCategoryScores(product, allProducts);
+  const qpIndex = scores === null ? calcQualityPriceIndex(product) : null;
 
   const topSpecs = fields
     .filter((field) => product.specs[field.key])
@@ -70,20 +70,17 @@ export function ProductCard({ product, allProducts, compareSelected, onEdit, onD
         </div>
       </td>
       <td className="pc-td-qp">
-        {monitorScores ? (
+        {scores && scoring ? (
           <div className="monitor-scores">
-            <ScoreBar label="Coding"  score={monitorScores.coding}  qp={monitorScores.codingQP} />
-            <ScoreBar label="Gaming"  score={monitorScores.gaming}  qp={monitorScores.gamingQP} />
-            <ScoreBar label="Grafica" score={monitorScores.grafica} qp={monitorScores.graficaQP} />
-            <ScoreBar label="Overall" score={monitorScores.overall} qp={monitorScores.overallQP} />
-            <div className="ms-legend">Perf &nbsp;|&nbsp; Q/P</div>
-          </div>
-        ) : blenderScores ? (
-          <div className="monitor-scores">
-            <ScoreBar label="Smooth" score={blenderScores.smoothie} qp={blenderScores.smoothieQP} />
-            <ScoreBar label="Ghiacc" score={blenderScores.ghiaccio} qp={blenderScores.ghiaccioQP} />
-            <ScoreBar label="Fam." score={blenderScores.famiglia} qp={blenderScores.famigliaQP} />
-            <ScoreBar label="Overall" score={blenderScores.overall} qp={blenderScores.overallQP} />
+            {scoring.dimensions.map((dimension) => (
+              <ScoreBar
+                key={dimension.key}
+                label={dimension.shortLabel}
+                score={scores.perf[dimension.key] ?? 0}
+                qp={scores.qp[dimension.key] ?? 0}
+              />
+            ))}
+            <ScoreBar label="Overall" score={scores.overall} qp={scores.overallQP} />
             <div className="ms-legend">Perf &nbsp;|&nbsp; Q/P</div>
           </div>
         ) : (

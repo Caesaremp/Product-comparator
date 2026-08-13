@@ -7,6 +7,8 @@ import type { Product, ProductCategory, ProductReview, ProductSpecValue, SpecKey
 interface ProductModalProps {
   product: Product | null;
   categories: ProductCategory[];
+  /** Categoria preselezionata per un nuovo prodotto (dal filtro attivo). */
+  defaultCategory?: ProductCategory;
   onSave: (product: Product) => void;
   onClose: () => void;
 }
@@ -18,8 +20,8 @@ interface DraftReview {
   count: number;
 }
 
-export function ProductModal({ product, categories, onSave, onClose }: ProductModalProps) {
-  const [data, setData] = useState<Product>(product ?? createEmptyProduct());
+export function ProductModal({ product, categories, defaultCategory, onSave, onClose }: ProductModalProps) {
+  const [data, setData] = useState<Product>(product ?? createEmptyProduct(defaultCategory));
   const [newReview, setNewReview] = useState<DraftReview>({ source: "", text: "", rating: 0, count: 0 });
 
   const fields = CATEGORY_FIELDS[data.category] ?? CATEGORY_FIELDS.Generico;

@@ -4,34 +4,42 @@ import { ProductCard } from "./components/ProductCard";
 import { ProductModal } from "./components/ProductModal";
 import { CATEGORIES } from "./data/catalog";
 import { createProduct, deleteProductById, getErrorMessage, loadProducts, updateProduct } from "./lib/api";
-import { calcBlenderScores, calcMonitorScores, calcQualityPriceIndex } from "./lib/scoring";
+import { CATEGORY_SCORING, SCORED_CATEGORIES, calcCategoryScores, calcQualityPriceIndex, getDimensionScore } from "./lib/scoring";
 import type { Product, ProductCategory } from "./types/product";
 
 type ViewMode = "products" | "compare";
-type SortMode =
-  | "date"
-  | "price"
-  | "qp"
-  | "rating"
-  | "perf_coding"
-  | "perf_gaming"
-  | "perf_grafica"
-  | "perf_overall"
-  | "perf_smoothie"
-  | "perf_ghiaccio"
-  | "perf_famiglia"
-  | "perf_pulizia"
-  | "perf_blender_overall"
-  | "qp_coding"
-  | "qp_gaming"
-  | "qp_grafica"
-  | "qp_overall"
-  | "qp_smoothie"
-  | "qp_ghiaccio"
-  | "qp_famiglia"
-  | "qp_pulizia"
-  | "qp_blender_overall";
+/** Either a global mode, or `perf:<categoria>:<dimensione>` / `qp:<categoria>:<dimensione>`. */
+type SortMode = string;
 type FilterCategory = "Tutti" | ProductCategory;
+
+interface SortOptionGroup {
+  label: string;
+  options: Array<{ value: string; label: string }>;
+}
+
+/** One Performance and one Q/P group per scored category, dimensions included. */
+const SCORE_SORT_GROUPS: SortOptionGroup[] = SCORED_CATEGORIES.flatMap((category) => {
+  const scoring = CATEGORY_SCORING[category];
+  if (!scoring) return [];
+
+  const dimensions = [{ key: "overall", label: "Overall" }, ...scoring.dimensions];
+  return [
+    {
+      label: `${category} — Performance`,
+      options: dimensions.map((dimension) => ({
+        value: `perf:${category}:${dimension.key}`,
+        label: `Perf. ${dimension.label} ↓`,
+      })),
+    },
+    {
+      label: `${category} — Q/P`,
+      options: dimensions.map((dimension) => ({
+        value: `qp:${category}:${dimension.key}`,
+        label: `Q/P ${dimension.label} ↓`,
+      })),
+    },
+  ];
+});
 
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -107,55 +115,34 @@ export default function App() {
   const filteredProducts = useMemo(() => {
     const list = filterCategory === "Tutti" ? [...products] : products.filter((product) => product.category === filterCategory);
 
-    const qualityPriceScore = (product: Product) =>
-      calcMonitorScores(product, products)?.overallQP
-      ?? calcBlenderScores(product, products)?.overallQP
-      ?? calcQualityPriceIndex(product)
-      ?? -1;
+    // A dimension only makes sense inside its own category, so products of other
+    // categories drop to the bottom.
+    if (sortBy.includes(":")) {
+      const [kind, sortCategory, dimension] = sortBy.split(":");
+      const isQualityPrice = kind === "qp";
+      const scores = new Map(
+        list.map((product) => [
+          product.id,
+          product.category === sortCategory ? getDimensionScore(product, products, dimension, isQualityPrice) ?? -1 : -1,
+        ])
+      );
+      return list.sort((left, right) => (scores.get(right.id) ?? -1) - (scores.get(left.id) ?? -1));
+    }
 
     switch (sortBy) {
       case "price":
         return list.sort((left, right) => (Number.parseFloat(String(left.price)) || 9999) - (Number.parseFloat(String(right.price)) || 9999));
-      case "qp":
-        return list.sort((left, right) => qualityPriceScore(right) - qualityPriceScore(left));
+      case "qp": {
+        const scores = new Map(
+          list.map((product) => [
+            product.id,
+            calcCategoryScores(product, products)?.overallQP ?? calcQualityPriceIndex(product) ?? -1,
+          ])
+        );
+        return list.sort((left, right) => (scores.get(right.id) ?? -1) - (scores.get(left.id) ?? -1));
+      }
       case "rating":
         return list.sort((left, right) => right.rating - left.rating);
-      case "perf_coding":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.coding ?? -1) - (calcMonitorScores(a, products)?.coding ?? -1));
-      case "perf_gaming":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.gaming ?? -1) - (calcMonitorScores(a, products)?.gaming ?? -1));
-      case "perf_grafica":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.grafica ?? -1) - (calcMonitorScores(a, products)?.grafica ?? -1));
-      case "perf_overall":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.overall ?? -1) - (calcMonitorScores(a, products)?.overall ?? -1));
-      case "perf_smoothie":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.smoothie ?? -1) - (calcBlenderScores(a, products)?.smoothie ?? -1));
-      case "perf_ghiaccio":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.ghiaccio ?? -1) - (calcBlenderScores(a, products)?.ghiaccio ?? -1));
-      case "perf_famiglia":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.famiglia ?? -1) - (calcBlenderScores(a, products)?.famiglia ?? -1));
-      case "perf_pulizia":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.pulizia ?? -1) - (calcBlenderScores(a, products)?.pulizia ?? -1));
-      case "perf_blender_overall":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.overall ?? -1) - (calcBlenderScores(a, products)?.overall ?? -1));
-      case "qp_coding":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.codingQP ?? -1) - (calcMonitorScores(a, products)?.codingQP ?? -1));
-      case "qp_gaming":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.gamingQP ?? -1) - (calcMonitorScores(a, products)?.gamingQP ?? -1));
-      case "qp_grafica":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.graficaQP ?? -1) - (calcMonitorScores(a, products)?.graficaQP ?? -1));
-      case "qp_overall":
-        return list.sort((a, b) => (calcMonitorScores(b, products)?.overallQP ?? -1) - (calcMonitorScores(a, products)?.overallQP ?? -1));
-      case "qp_smoothie":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.smoothieQP ?? -1) - (calcBlenderScores(a, products)?.smoothieQP ?? -1));
-      case "qp_ghiaccio":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.ghiaccioQP ?? -1) - (calcBlenderScores(a, products)?.ghiaccioQP ?? -1));
-      case "qp_famiglia":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.famigliaQP ?? -1) - (calcBlenderScores(a, products)?.famigliaQP ?? -1));
-      case "qp_pulizia":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.puliziaQP ?? -1) - (calcBlenderScores(a, products)?.puliziaQP ?? -1));
-      case "qp_blender_overall":
-        return list.sort((a, b) => (calcBlenderScores(b, products)?.overallQP ?? -1) - (calcBlenderScores(a, products)?.overallQP ?? -1));
       default:
         return list.sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime());
     }
@@ -223,32 +210,15 @@ export default function App() {
                   <option value="price">Prezzo ↑</option>
                   <option value="qp">Qualità/Prezzo ↓</option>
                   <option value="rating">Rating ↓</option>
-                  <optgroup label="Monitor — Performance">
-                    <option value="perf_overall">Perf. Overall ↓</option>
-                    <option value="perf_coding">Perf. Coding ↓</option>
-                    <option value="perf_gaming">Perf. Gaming ↓</option>
-                    <option value="perf_grafica">Perf. Grafica ↓</option>
-                  </optgroup>
-                  <optgroup label="Monitor — Q/P">
-                    <option value="qp_overall">Q/P Overall ↓</option>
-                    <option value="qp_coding">Q/P Coding ↓</option>
-                    <option value="qp_gaming">Q/P Gaming ↓</option>
-                    <option value="qp_grafica">Q/P Grafica ↓</option>
-                  </optgroup>
-                  <optgroup label="Frullatori — Performance">
-                    <option value="perf_blender_overall">Perf. Overall ↓</option>
-                    <option value="perf_smoothie">Perf. Smoothie ↓</option>
-                    <option value="perf_ghiaccio">Perf. Ghiaccio ↓</option>
-                    <option value="perf_famiglia">Perf. Famiglia ↓</option>
-                    <option value="perf_pulizia">Perf. Pulizia ↓</option>
-                  </optgroup>
-                  <optgroup label="Frullatori — Q/P">
-                    <option value="qp_blender_overall">Q/P Overall ↓</option>
-                    <option value="qp_smoothie">Q/P Smoothie ↓</option>
-                    <option value="qp_ghiaccio">Q/P Ghiaccio ↓</option>
-                    <option value="qp_famiglia">Q/P Famiglia ↓</option>
-                    <option value="qp_pulizia">Q/P Pulizia ↓</option>
-                  </optgroup>
+                  {SCORE_SORT_GROUPS.map((group) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {group.options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </div>
               <button
@@ -313,6 +283,7 @@ export default function App() {
           <ProductModal
             product={editProduct}
             categories={CATEGORIES}
+            defaultCategory={filterCategory === "Tutti" ? undefined : filterCategory}
             onSave={(product) => void handleSave(product)}
             onClose={() => {
               setShowModal(false);

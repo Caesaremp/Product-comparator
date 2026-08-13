@@ -2,22 +2,19 @@
 
 Local-first product comparison app with a React/Vite frontend and an Express API backed by SQLite.
 
-The project is built to track products you are evaluating, store structured specs by category, attach notes and review snippets, and compare items with a focus on quality/price. Monitors currently have a dedicated scoring model for coding, gaming, graphics, and overall value.
+The project is built to track products you are evaluating, store structured specs by category, attach notes and review snippets, and compare items with a focus on quality/price. Monitors, blenders and PC components have dedicated scoring models tailored to their own dimensions.
 
 ## Features
 
 - Create, edit, delete, and compare saved products
 - Persistent local storage through SQLite
-- Category-specific forms for `Monitor`, `Laptop`, `Tastiera`, and `Generico`
+- Category-specific forms for `Monitor`, `Laptop`, `Tastiera`, `Frullatore`, `RAM`, `Scheda Madre`, `CPU`, `GPU`, `Alimentatore`, and `Generico`
 - Use cases and review snippets attached to each product
 - Quality/price index for all categories
-- Advanced monitor scoring for:
-  - coding performance
-  - gaming performance
-  - graphics/video performance
-  - overall performance
-  - value indexes derived from price
-- Product table filters and sorting, including monitor-specific ranking modes
+- Dedicated scoring per category, each on its own dimensions plus:
+  - an overall score weighted by the selected use cases
+  - value indexes derived from price for every dimension
+- Product table filters and sorting, including category-specific ranking modes
 
 ## Tech Stack
 
@@ -122,29 +119,44 @@ Supported categories:
 - `Monitor`
 - `Laptop`
 - `Tastiera`
+- `Frullatore`
+- `RAM`
+- `Scheda Madre`
+- `CPU`
+- `GPU`
+- `Alimentatore`
 - `Generico`
 
 ## Scoring
 
 ### General Quality/Price Index
 
-All categories use a general quality/price heuristic based on:
+Categories without a dedicated scoring system fall back to a generic quality/price heuristic based on:
 
 - user rating
 - number of selected use cases
 - completeness of filled category specs
 - number of attached reviews
 
-### Monitor Scoring
+### Category Scoring
 
-Monitors have an additional dedicated scoring system implemented in [`frontend/src/lib/scoring.ts`] and documented in [`docs/monitor-scoring-algorithm.md`].
+Scored categories live in [`frontend/src/lib/scoring`], one module each, wired through `registry.ts`. Every one of them produces performance scores on its own dimensions, an overall score weighted by the product's use cases, and a price-normalized counterpart for each.
 
-It calculates:
+| Category | Dimensions |
+|---|---|
+| Monitor | coding, gaming, graphics |
+| Frullatore | smoothie, ice, family, cleaning |
+| RAM | gaming, productivity, overclock, compatibility |
+| Scheda Madre | gaming, expandability, overclock, connectivity |
+| CPU | gaming, productivity, efficiency, overclock |
+| GPU | raster gaming, ray tracing, creation/AI, efficiency, compactness |
+| Alimentatore | power, efficiency, noise, reliability, compactness |
 
-- performance scores for coding, gaming, graphics, and overall
-- value scores for the same dimensions using price normalization
+Monitors are scored against fixed thresholds (resolution, panel type, refresh rate, response time, color gamut, HDR, ports, ergonomics, VESA, energy class), documented in [`docs/monitor-scoring-algorithm.md`].
 
-Factors currently considered include resolution, size, panel type, refresh rate, response time, color gamut, HDR, ports, ergonomics, VESA support, and energy class.
+Blenders and PC components are scored relative to the other products of the same category in the database, so no value threshold is hardcoded. See [`docs/pc-components-scoring-algorithm.md`].
+
+Adding a category means adding a scoring module and one registry entry: the product table, the comparison view and the sort modes are generated from the registry.
 
 ## API Overview
 
@@ -167,6 +179,7 @@ See [`frontend/src/lib/api.ts`].
 ## Documentation
 
 - Monitor scoring spec: [`docs/monitor-scoring-algorithm.md`]
+- PC components scoring spec: [`docs/pc-components-scoring-algorithm.md`]
 - Implementation plans: [`docs/implementation-plans`]
 
 ## Manual Verification

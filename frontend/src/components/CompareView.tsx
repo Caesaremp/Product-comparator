@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { CATEGORY_FIELDS } from "../data/catalog";
-import { type BlenderScores, type MonitorScores, calcBlenderScores, calcMonitorScores, calcQualityPriceIndex, getMonitorScoreColor, getMonitorScoreLabel, getQualityPriceLabel } from "../lib/scoring";
+import { calcQualityPriceIndex, getCategoryScoring, getDimensionScore, getMonitorScoreColor, getMonitorScoreLabel, getQualityPriceLabel } from "../lib/scoring";
 import type { Product } from "../types/product";
 
 interface CompareViewProps {
@@ -28,98 +28,36 @@ export function CompareView({ products, allProducts }: CompareViewProps) {
 
   const category = products[0].category;
   const fields = CATEGORY_FIELDS[category] ?? CATEGORY_FIELDS.Generico;
-  const isMonitor = category === "Monitor";
-  const isBlender = category === "Frullatore";
+  const scoring = getCategoryScoring(category);
 
-  function monitorScoreRow(
-    label: string,
-    key: string,
-    getScore: (s: MonitorScores) => number,
-  ): CompareRow {
+  function scoreRow(label: string, key: string, dimension: string, qualityPrice: boolean): CompareRow {
+    const readScore = (product: Product) => getDimensionScore(product, allProducts, dimension, qualityPrice);
     return {
       label,
       key,
       render: (product) => {
-        const ms = calcMonitorScores(product, allProducts);
-        const val = ms ? getScore(ms) : undefined;
-        if (val === undefined || val === null) return "—";
+        const value = readScore(product);
+        if (value === null) return "—";
         return (
-          <span style={{ color: getMonitorScoreColor(val), fontWeight: 600 }}>
-            {val} <span style={{ fontWeight: 400, color: "var(--c-text-secondary)", fontSize: "0.75rem" }}>— {getMonitorScoreLabel(val)}</span>
+          <span style={{ color: getMonitorScoreColor(value), fontWeight: 600 }}>
+            {value} <span style={{ fontWeight: 400, color: "var(--c-text-secondary)", fontSize: "0.75rem" }}>— {getMonitorScoreLabel(value)}</span>
           </span>
         );
       },
-      getValue: (product) => {
-        const ms = calcMonitorScores(product, allProducts);
-        return ms ? (getScore(ms) ?? null) : null;
-      },
+      getValue: readScore,
       getBestValue: (prods) => {
-        const vals = prods.map((p) => {
-          const ms = calcMonitorScores(p, allProducts);
-          return ms ? (getScore(ms) ?? null) : null;
-        }).filter((v): v is number => v !== null);
-        return vals.length ? Math.max(...vals) : null;
+        const values = prods.map(readScore).filter((value): value is number => value !== null);
+        return values.length ? Math.max(...values) : null;
       },
     };
   }
 
-  const monitorScoreRows: CompareRow[] = isMonitor
+  const scoreRows: CompareRow[] = scoring
     ? [
-        monitorScoreRow("Perf. Coding",   "_ms_coding",    (s) => s.coding),
-        monitorScoreRow("Perf. Gaming",   "_ms_gaming",    (s) => s.gaming),
-        monitorScoreRow("Perf. Grafica",  "_ms_grafica",   (s) => s.grafica),
-        monitorScoreRow("Perf. Overall",  "_ms_overall",   (s) => s.overall),
-        monitorScoreRow("Q/P Coding",     "_ms_qp_coding", (s) => s.codingQP),
-        monitorScoreRow("Q/P Gaming",     "_ms_qp_gaming", (s) => s.gamingQP),
-        monitorScoreRow("Q/P Grafica",    "_ms_qp_grafica",(s) => s.graficaQP),
-        monitorScoreRow("Q/P Overall",    "_ms_qp_overall",(s) => s.overallQP),
-      ]
-    : [];
-
-  function blenderScoreRow(
-    label: string,
-    key: string,
-    getScore: (s: BlenderScores) => number,
-  ): CompareRow {
-    return {
-      label,
-      key,
-      render: (product) => {
-        const bs = calcBlenderScores(product, allProducts);
-        const val = bs ? getScore(bs) : undefined;
-        if (val === undefined || val === null) return "—";
-        return (
-          <span style={{ color: getMonitorScoreColor(val), fontWeight: 600 }}>
-            {val} <span style={{ fontWeight: 400, color: "var(--c-text-secondary)", fontSize: "0.75rem" }}>— {getMonitorScoreLabel(val)}</span>
-          </span>
-        );
-      },
-      getValue: (product) => {
-        const bs = calcBlenderScores(product, allProducts);
-        return bs ? (getScore(bs) ?? null) : null;
-      },
-      getBestValue: (prods) => {
-        const vals = prods.map((p) => {
-          const bs = calcBlenderScores(p, allProducts);
-          return bs ? (getScore(bs) ?? null) : null;
-        }).filter((v): v is number => v !== null);
-        return vals.length ? Math.max(...vals) : null;
-      },
-    };
-  }
-
-  const blenderScoreRows: CompareRow[] = isBlender
-    ? [
-        blenderScoreRow("Perf. Smoothie",   "_bs_smoothie",    (s) => s.smoothie),
-        blenderScoreRow("Perf. Ghiaccio",   "_bs_ghiaccio",    (s) => s.ghiaccio),
-        blenderScoreRow("Perf. Famiglia",   "_bs_famiglia",    (s) => s.famiglia),
-        blenderScoreRow("Perf. Pulizia",    "_bs_pulizia",     (s) => s.pulizia),
-        blenderScoreRow("Perf. Overall",    "_bs_overall",     (s) => s.overall),
-        blenderScoreRow("Q/P Smoothie",     "_bs_qp_smoothie", (s) => s.smoothieQP),
-        blenderScoreRow("Q/P Ghiaccio",     "_bs_qp_ghiaccio", (s) => s.ghiaccioQP),
-        blenderScoreRow("Q/P Famiglia",     "_bs_qp_famiglia", (s) => s.famigliaQP),
-        blenderScoreRow("Q/P Pulizia",      "_bs_qp_pulizia",  (s) => s.puliziaQP),
-        blenderScoreRow("Q/P Overall",      "_bs_qp_overall",  (s) => s.overallQP),
+        ...scoring.dimensions.map((dimension) => scoreRow(`Perf. ${dimension.label}`, `_perf_${dimension.key}`, dimension.key, false)),
+        scoreRow("Perf. Overall", "_perf_overall", "overall", false),
+        ...scoring.dimensions.map((dimension) => scoreRow(`Q/P ${dimension.label}`, `_qp_${dimension.key}`, dimension.key, true)),
+        scoreRow("Q/P Overall", "_qp_overall", "overall", true),
       ]
     : [];
 
@@ -144,7 +82,7 @@ export function CompareView({ products, allProducts }: CompareViewProps) {
         return `${avg.toFixed(1)} / 5`;
       },
     },
-    ...(!isMonitor && !isBlender
+    ...(!scoring
       ? [
           {
             label: "Q/P Index",
@@ -161,8 +99,7 @@ export function CompareView({ products, allProducts }: CompareViewProps) {
           },
         ]
       : []),
-    ...monitorScoreRows,
-    ...blenderScoreRows,
+    ...scoreRows,
     ...fields.map((field) => ({
       label: field.label,
       key: field.key,
