@@ -1,0 +1,53 @@
+[
+  {
+    "id": "tv-philips-55pqs8501",
+    "name": "Philips PQS8501 55\" (55PQS8501)",
+    "category": "Generico",
+    "price": 439,
+    "url": "",
+    "rating": 0,
+    "specs": {
+      "brand": "Philips",
+      "model": "55PQS8501",
+      "description": "TV 55\" 4K QLED, Ambilight, AmbiScape, IntelliSound."
+    },
+    "useCases": ["Uso quotidiano"],
+    "reviews": [],
+    "notes": "Prezzo minimo 439,00 € (aggiunto ai preferiti il 21/11/2026 a 439,00 €). Alert attivo: prezzo desiderato 390,00 €.",
+    "createdAt": "2026-11-21T07:40:00.000Z"
+  },
+  {
+    "id": "tv-philips-55pqs8701",
+    "name": "Philips 55PQS8701/12 TV QLED 55\"",
+    "category": "Generico",
+    "price": 671.49,
+    "url": "",
+    "rating": 0,
+    "specs": {
+      "brand": "Philips",
+      "model": "55PQS8701/12",
+      "description": "TV QLED 55\" 4K, Smart TV, processore P5 Perfect Picture, Ambilight, AmbiScape, IntelliSound, classe energetica F."
+    },
+    "useCases": ["Uso quotidiano"],
+    "reviews": [],
+    "notes": "MediaWorld: 671,49 €, spedizione gratuita, disponibile (unica offerta trovata, 21/11/2026).",
+    "createdAt": "2026-11-21T07:40:00.000Z"
+  },
+  {
+    "id": "tv-philips-55oled761",
+    "name": "Philips 55OLED761/12 TV OLED 55\"",
+    "category": "Generico",
+    "price": 899,
+    "url": "",
+    "rating": 0,
+    "specs": {
+      "brand": "Philips",
+      "model": "55OLED761/12",
+      "description": "TV OLED 55\" 4K UHD, Smart TV, processore P5 AI Perfect Picture, Ambilight, AmbiScape, classe energetica G."
+    },
+    "useCases": ["Uso quotidiano"],
+    "reviews": [],
+    "notes": "4 offerte (21/11/2026). MediaWorld: 899,00 €, spedizione gratuita (tot. 899,00 €). Euronics: 899,00 € + 49,00 € spedizione (tot. 948,00 €).",
+    "createdAt": "2026-11-21T07:40:00.000Z"
+  }
+]

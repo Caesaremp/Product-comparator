@@ -14,7 +14,8 @@
     "dev:frontend": "npm run dev -w frontend",
     "build": "npm run build -w frontend",
     "build:frontend": "npm run build -w frontend",
-    "typecheck": "npm run typecheck -w frontend"
+    "typecheck": "npm run typecheck -w frontend",
+    "import": "node server/import-products.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",
